@@ -39,6 +39,7 @@ const localGurdianSchema = z.object({
 // Zod Schema for Student
 const studentSchemaValidationZod = z.object({
   id: z.string().min(1, 'id is required'),
+  password: z.string().max(20),
   name: userSchema.refine((name) => !!name, { message: 'name is required' }),
   gender: z.enum(['male', 'female', 'other']),
   dateOfBirth: z.string().optional(),
@@ -59,6 +60,7 @@ const studentSchemaValidationZod = z.object({
   }),
   profileImg: z.string().optional(),
   isActive: z.enum(['active', 'blocked']).default('active'),
+  isDeleted: z.boolean(),
 });
 
 export default studentSchemaValidationZod;

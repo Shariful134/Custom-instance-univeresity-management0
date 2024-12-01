@@ -3,10 +3,11 @@ import {
   TGuardian,
   TLocalGurdian,
   TStudent,
-  StudentMethod,
-  StudentModel,
   TUserName,
+  userModel,
 } from './student.interface';
+import bcrypt from 'bcrypt';
+import config from '../../config';
 
 const userSchema = new Schema<TUserName>({
   firstName: {
@@ -52,49 +53,111 @@ const localGurdianSchema = new Schema<TLocalGurdian>({
   address: { type: String, required: true },
 });
 
-const studentSchema = new Schema<TStudent, StudentModel, StudentMethod>({
-  id: { type: String, required: true, unique: true },
-  name: {
-    type: userSchema,
-    required: [true, 'name is required'],
-  },
-  gender: {
-    type: String,
-    enum: {
-      values: ['male', 'female', 'other'],
-      message: '{VALUE} is not valid',
-    },
-    requird: true,
-  },
-  dateOfBirth: { type: String },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  avater: { type: String, required: true },
-  contactNo: { type: String, required: true },
-  emergencyContactNo: { type: String, required: true },
-  bloodGroupe: {
-    type: String,
-    enum: ['A', 'B', 'AB', 'O', 'A+', 'B+', 'AB+', 'O+', 'B-', 'AB-', 'O-'],
-  },
+const studentSchema = new Schema<TStudent, userModel>(
+  {
+    id: { type: String, required: true, unique: true },
+    password: {
+      type: String,
+      required: true,
 
-  presentAddress: { type: String, required: true },
-  parmanentAddress: { type: String, required: true },
-  gurdian: { type: guardianSchema, required: true },
-  localGurdian: { type: localGurdianSchema, required: true },
-  profileImg: { type: String },
-  isActive: {
-    type: String,
-    ennum: ['active', 'blocked'],
-    default: 'active',
+      maxlength: [20, 'password can not be more than 20 charecter'],
+    },
+    name: {
+      type: userSchema,
+      required: [true, 'name is required'],
+    },
+    gender: {
+      type: String,
+      enum: {
+        values: ['male', 'female', 'other'],
+        message: '{VALUE} is not valid',
+      },
+      requird: true,
+    },
+    dateOfBirth: { type: String },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    avater: { type: String, required: true },
+    contactNo: { type: String, required: true },
+    emergencyContactNo: { type: String, required: true },
+    bloodGroupe: {
+      type: String,
+      enum: ['A', 'B', 'AB', 'O', 'A+', 'B+', 'AB+', 'O+', 'B-', 'AB-', 'O-'],
+    },
+
+    presentAddress: { type: String, required: true },
+    parmanentAddress: { type: String, required: true },
+    gurdian: { type: guardianSchema, required: true },
+    localGurdian: { type: localGurdianSchema, required: true },
+    profileImg: { type: String },
+    isActive: {
+      type: String,
+      ennum: ['active', 'blocked'],
+      default: 'active',
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
+  {
+    toJSON: {
+      virtuals: true,
+    },
+  },
+);
+
+//virtual
+studentSchema.virtual('fullName').get(function () {
+  return `${this.name.firstName}  ${this.name.middleName}  ${this.name.lastName}`;
 });
 
-studentSchema.methods.isUserExists = async function (id: string) {
-  const existingUser = await Student.findOne({ id: id });
+//query middleware
+studentSchema.pre('find', function (next) {
+  this.find({ isDeleted: { $ne: true } });
+  // console.log(this);
+  next();
+});
+// studentSchema.pre('findOne',  function (next) {
+//   this.find({ isDeleted: { $ne: true } });
+//   // console.log(this);
+//   next();
+// });
+studentSchema.pre('aggregate', function (next) {
+  this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
+  // console.log(this);
+  next();
+});
+
+// create pre middleware/hook: will work on create and save
+studentSchema.pre('save', async function (next) {
+  // console.log(this, 'pre hook: we will sava this data');
+  //hashing password and save in to DB
+  const user = this;
+  user.password = await bcrypt.hash(
+    user.password,
+    Number(config.bcrypt_salt_round),
+  );
+  next();
+});
+
+//creating a post middleware
+studentSchema.post('save', function (doc, next) {
+  doc.password = '';
+  next();
+});
+//creating a instance method
+
+studentSchema.statics.isUserExists = async function (id: string) {
+  const existingUser = await Student.findOne({ id });
   return existingUser;
 };
-
-export const Student = model<TStudent, StudentModel>('Student', studentSchema);
+//creating a custom instance mathod
+// studentSchema.methods.isUserExists = async function (id: string) {
+//   const existingUser = await Student.findOne({ id: id });
+//   return existingUser;
+// };
+export const Student = model<TStudent, userModel>('Student', studentSchema);
