@@ -1,81 +1,53 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { studentServices } from './student.service';
-import studentSchemaValidationZod from './student.zod.validation';
-// import studentValidationSchema from './student.validation';
+import sendResponse from '../../utils/sendResponse';
+import { StatusCodes } from 'http-status-codes';
 
 //will call controler function
-const createStudent = async (req: Request, res: Response) => {
-  try {
-    const { student: studentData } = req.body;
-    //data validation using joi pakage
-    // const { error, value } = studentValidationSchema.validate(studentData);
-    //will call service function to send this data
-    // console.log('error:', error, 'value:', value);
-    //data validation using zod
-    const zodParseData = studentSchemaValidationZod.parse(studentData);
-    const result = await studentServices.createStudentIntDB(zodParseData);
-
-    // if (error) {
-    //   res.status(400).json({
-    //     success: true,
-    //     message: 'somthing went wrong',
-    //     error: error.details,
-    //   });
-    // }
-
-    //send response
-    res.status(200).json({
-      success: true,
-      message: 'student is created successfully',
-      data: result,
-    });
-  } catch (error: any) {
-    res.status(400).json({
-      success: false,
-      message: error.message || 'somthing went wrong',
-      error: error,
-    });
-  }
-};
-
-const getAllDataStudent = async (req: Request, res: Response) => {
+const getAllDataStudent = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const result = await studentServices.getAllDataFromDB();
 
-    res.status(200).json({
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
       success: true,
-      message: 'student is retrived successfully',
+      message: 'Student retrived successfully',
       data: result,
     });
-  } catch (error: any) {
-    res.status(400).json({
-      success: false,
-      message: error.message || 'somthing went wrong',
-      error: error,
-    });
+  } catch (error) {
+    next(error);
   }
 };
 
-const getsingleStudent = async (req: Request, res: Response) => {
+const getsingleStudent = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { id } = req.params;
     const result = await studentServices.getsingleDataFromDB(id);
 
-    res.status(200).json({
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
       success: true,
-      message: 'student is retrieved successfully',
+      message: 'Student retrived successfully',
       data: result,
     });
-  } catch (error: any) {
-    res.status(400).json({
-      success: false,
-      message: error.message || 'somthing went wrong',
-      error: error,
-    });
+  } catch (error) {
+    next(error);
   }
 };
 
-const deletStudent = async (req: Request, res: Response) => {
+const deletStudent = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { id } = req.params;
     const result = await studentServices.deletDataFromDB(id);
@@ -85,17 +57,12 @@ const deletStudent = async (req: Request, res: Response) => {
       message: 'student is deleted successfully',
       data: result,
     });
-  } catch (error: any) {
-    res.status(400).json({
-      success: false,
-      message: error.message || 'somthing went wrong',
-      error: error,
-    });
+  } catch (error) {
+    next(error);
   }
 };
 
 export const StudentControlers = {
-  createStudent,
   getAllDataStudent,
   getsingleStudent,
   deletStudent,
