@@ -1,10 +1,13 @@
 import config from '../../config';
+//import { TAcademicSemester } from '../academicSemester/academicSemester.interface';
+import { AcademicSemester } from '../academicSemester/academicSemester.model';
 import { TStudent } from '../student/student.interface';
 import { Student } from '../student/student.model';
 import { TUser } from './user.interface';
 import { User } from './user.model';
+import { generateStudentId } from './user.utils';
 
-const createStudentIntDB = async (password: string, studnetData: TStudent) => {
+const createStudentIntDB = async (password: string, payload: TStudent) => {
   //create a user object
   const userData: Partial<TUser> = {};
 
@@ -14,18 +17,26 @@ const createStudentIntDB = async (password: string, studnetData: TStudent) => {
   //set student role
   userData.role = 'student';
 
-  //set manually generated id
-  userData.id = '203010000112';
+  //find academic semester
+  const addmissionSemester = await AcademicSemester.findById(
+    payload.addmissionSemester,
+  );
+
+  if (!addmissionSemester) {
+    throw new Error('Admission semester not found');
+  }
+  //set  generated id
+  userData.id = await generateStudentId(addmissionSemester);
 
   //create a user
   const newUser = await User.create(userData);
 
   //create a student
   if (Object.keys(newUser).length) {
-    studnetData.id = newUser.id;
-    studnetData.user = newUser._id; //reference _id
+    payload.id = newUser.id;
+    payload.user = newUser._id; //reference _id
 
-    const newStudent = await Student.create(studnetData);
+    const newStudent = await Student.create(payload);
     return newStudent;
   }
 };

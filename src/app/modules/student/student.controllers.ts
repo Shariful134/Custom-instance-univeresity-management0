@@ -1,14 +1,11 @@
-import { NextFunction, Request, Response } from 'express';
+import { RequestHandler } from 'express';
 import { studentServices } from './student.service';
 import sendResponse from '../../utils/sendResponse';
 import { StatusCodes } from 'http-status-codes';
+import catchAsync from '../../utils/catchAsync';
 
 //will call controler function
-const getAllDataStudent = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+const getAllDataStudent: RequestHandler = async (req, res, next) => {
   try {
     const result = await studentServices.getAllDataFromDB();
 
@@ -23,45 +20,29 @@ const getAllDataStudent = async (
   }
 };
 
-const getsingleStudent = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
-    const { id } = req.params;
-    const result = await studentServices.getsingleDataFromDB(id);
+const getsingleStudent = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const result = await studentServices.getsingleDataFromDB(id);
 
-    sendResponse(res, {
-      statusCode: StatusCodes.OK,
-      success: true,
-      message: 'Student retrived successfully',
-      data: result,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Student retrived successfully',
+    data: result,
+  });
+});
 
-const deletStudent = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
-    const { id } = req.params;
-    const result = await studentServices.deletDataFromDB(id);
+const deletStudent = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const result = await studentServices.deletDataFromDB(id);
 
-    res.status(200).json({
-      success: true,
-      message: 'student is deleted successfully',
-      data: result,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Student is deleted successfully',
+    data: result,
+  });
+});
 export const StudentControlers = {
   getAllDataStudent,
   getsingleStudent,

@@ -1,4 +1,4 @@
-import { Model, Types } from 'mongoose';
+import { Model, ObjectId, Types } from 'mongoose';
 
 export type TGuardian = {
   fatherName: string;
@@ -50,6 +50,7 @@ export type TStudent = {
   gurdian: TGuardian;
   localGurdian: TLocalGurdian;
   profileImg?: string;
+  addmissionSemester: ObjectId;
   isDeleted: boolean;
 };
 
