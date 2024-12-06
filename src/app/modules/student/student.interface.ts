@@ -52,6 +52,7 @@ export type TStudent = {
   profileImg?: string;
   addmissionSemester: ObjectId;
   isDeleted: boolean;
+  academicDepertment: ObjectId;
 };
 
 //for creating statick method

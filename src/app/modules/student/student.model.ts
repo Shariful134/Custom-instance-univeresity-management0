@@ -99,6 +99,10 @@ const studentSchema = new Schema<TStudent, userModel>(
       type: Boolean,
       default: false,
     },
+    academicDepertment: {
+      type: Schema.Types.ObjectId,
+      ref: 'academicDepertment',
+    },
   },
   {
     toJSON: {
