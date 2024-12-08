@@ -37,7 +37,7 @@ const createStudentIntDB = async (password: string, payload: TStudent) => {
 
     //create a user
     const newUser = await User.create([userData], { session });
-    console.log(newUser);
+    // console.log(newUser);
 
     //create a student
     if (!newUser.length) {

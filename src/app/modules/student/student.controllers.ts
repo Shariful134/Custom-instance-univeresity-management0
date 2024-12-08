@@ -6,8 +6,9 @@ import catchAsync from '../../utils/catchAsync';
 
 //will call controler function
 const getAllDataStudent: RequestHandler = async (req, res, next) => {
+  // console.log(req.query);
   try {
-    const result = await studentServices.getAllDataFromDB();
+    const result = await studentServices.getAllDataFromDB(req.query);
 
     sendResponse(res, {
       statusCode: StatusCodes.OK,

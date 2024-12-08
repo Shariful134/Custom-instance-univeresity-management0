@@ -15,18 +15,18 @@ const academicDepertmentSchema = new Schema<TAcademicDepertment>(
 );
 
 //user pre middleware hooks to check duplicate depertment name
-academicDepertmentSchema.pre('save', async function (next) {
-  const isAcademicDepertmentExist = await AcademicDepertment.findOne({
-    name: this.name,
-  });
-  if (isAcademicDepertmentExist) {
-    throw new AppError(
-      StatusCodes.NOT_FOUND,
-      'This Academic Depertment is allready Exist!',
-    );
-  }
-  next();
-});
+// academicDepertmentSchema.pre('save', async function (next) {
+//   const isAcademicDepertmentExist = await AcademicDepertment.findOne({
+//     name: this.name,
+//   });
+//   if (isAcademicDepertmentExist) {
+//     throw new AppError(
+//       StatusCodes.NOT_FOUND,
+//       'This Academic Depertment is allready Exist!',
+//     );
+//   }
+//   next();
+// });
 //uuser pre middleware hooks to check depertment by using ID
 academicDepertmentSchema.pre('findOneAndUpdate', async function (next) {
   const query = this.getQuery();

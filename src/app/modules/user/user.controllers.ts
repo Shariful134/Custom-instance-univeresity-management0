@@ -4,6 +4,7 @@ import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../../utils/catchAsync';
 
 const createStudent = catchAsync(async (req, res) => {
+  console.log(req.query);
   const { password, student: studentData } = req.body;
   const result = await UserServices.createStudentIntDB(password, studentData);
   sendResponse(res, {

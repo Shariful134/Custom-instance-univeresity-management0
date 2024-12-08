@@ -1,6 +1,9 @@
 import mongoose from 'mongoose';
 import config from './app/config';
 import app from './app';
+// import { Serever } from 'http';
+
+// let server: Serever
 
 async function main() {
   try {
@@ -14,3 +17,13 @@ async function main() {
   }
 }
 main();
+
+// process.on('unhandledRejection', () => {
+//   console.log(`unhandledRejection is detecrted shuting down ...`);
+//   if (server) {
+//     server.close(() => {
+//       process.exit(1);
+//     });
+//   }
+//   process.exit(1);
+// });

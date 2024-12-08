@@ -4,17 +4,92 @@ import { AppError } from '../../errors/appError';
 import { StatusCodes } from 'http-status-codes';
 import { User } from '../user/user.model';
 import { TStudent } from './student.interface';
+import QueryBuilder from '../../builder/QueryModel';
+import { studentSearchableFields } from './student.constant';
 
-const getAllDataFromDB = async () => {
-  const result = await Student.find()
-    .populate('addmissionSemester')
-    .populate({
-      path: 'academicDepertment',
-      populate: {
-        path: 'academicFaculty',
-      },
-    });
+const getAllDataFromDB = async (query: Record<string, unknown>) => {
+  const studentQuery = new QueryBuilder(
+    Student.find()
+      .populate('addmissionSemester')
+      .populate({
+        path: 'academicDepertment',
+        populate: {
+          path: 'academicFaculty',
+        },
+      }),
+    query,
+  )
+    .search(studentSearchableFields)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const result = await studentQuery.modelQuery;
   return result;
+  // const queryObj = { ...query };
+  // // console.log('first:', queryObj);
+
+  // let searchTerm = '';
+
+  // if (query?.searchTerm) {
+  //   searchTerm = query.searchTerm as string;
+  // }
+  // //Filtering
+  // //const queryObj = { searchTerm: 'Shariful', email: 'Shariful1@gmail.com' }
+  // const excludeFields = ['searchTerm', 'sort', 'limit', 'page', 'fields'];
+  // excludeFields.forEach((el) => delete queryObj[el]);
+  // //const queryObj = { email: 'Shariful1@gmail.com' }
+  // console.log({ query }, { queryObj });
+
+  // const searchQuery = Student.find({
+  //   $or: studentSearchableFields.map((field) => ({
+  //     [field]: { $regex: searchTerm, $options: 'i' },
+  //   })),
+  // });
+
+  // const filterQuery = searchQuery
+  //   .find(queryObj)
+  //   .populate('addmissionSemester')
+  //   .populate({
+  //     path: 'academicDepertment',
+  //     populate: {
+  //       path: 'academicFaculty',
+  //     },
+  //   });
+  // // console.log(queryObj);
+  // let sort = '-createdAt';
+  // // console.log(query.sort);
+
+  // if (query.sort) {
+  //   sort = query.sort as string;
+  // }
+  // const sortQuery = filterQuery.sort(sort);
+  // // console.log('sortQuery:', sortQuery);
+
+  // let page = 1;
+  // let limit = 1;
+  // let skip = 0;
+
+  // if (query.limit) {
+  //   limit = Number(query.limit);
+  // }
+
+  // if (query.page) {
+  //   page = Number(query.page);
+  //   skip = (page - 1) * limit;
+  // }
+
+  // const paginateQuery = sortQuery.skip(skip);
+  // const limitQuery = paginateQuery.limit(limit);
+
+  // let fields = '-__v';
+  // if (query.fields) {
+  //   fields = (query.fields as string).split(',').join(' ');
+  //   console.log({ fields });
+  // }
+
+  // const fieldsQuery = await limitQuery.select(fields);
 };
 
 const getsingleDataFromDB = async (id: string) => {
